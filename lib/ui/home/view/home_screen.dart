@@ -1,0 +1,80 @@
+part of 'home_form.dart';
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final TextEditingController _joinCtrl = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const BuildText(text: 'TriplerCyber Challenge'),
+        centerTitle: true,
+      ),
+      body: BlocListener<CallBloc, CallState>(
+        listenWhen: (prev, curr) => prev is! InCall && curr is InCall,
+        listener: (context, state) {
+          if (state is InCall) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder:
+                    (_) => CallPage(
+                      roomId: state.roomId,
+                      local: state.local,
+                      remote: state.remote,
+                    ),
+              ),
+            );
+          }
+          if (state is CallError) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Create or Join a Room',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              const RightAwayCallButton(),
+              const SizedBox(height: 16),
+              const CreateCallButton(),
+              const SizedBox(height: 24),
+              TextField(
+                controller: _joinCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Enter Room ID',
+                  border: OutlineInputBorder(),
+                ),
+                textCapitalization: TextCapitalization.characters,
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.login),
+                label: const Text('Join'),
+                onPressed: () {
+                  final id = _joinCtrl.text.trim();
+                  if (id.isNotEmpty) {
+                    context.read<CallBloc>().add(JoinCallRequested(id));
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "27194873007",
+    "project_id": "triplecyber-challenge",
+    "storage_bucket": "triplecyber-challenge.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:27194873007:android:15ebd36443c8c66b2bf05a",
+        "android_client_info": {
+          "package_name": "com.example.triplecyber_challenge"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwu4q_wKr434u1B34v8UwPlni5PPMShjo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
