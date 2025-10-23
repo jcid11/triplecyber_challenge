@@ -11,3 +11,10 @@ Implementar un flujo completo de videollamada entre dos usuarios, demostrando do
 - 🧹 Manejo correcto de recursos, permisos y teardown de conexión
 
 ## ⚙️ Instrucciones de configuración e instalación
+
+Asegúrate de tener instalado en tu equipo:
+
+- Flutter SDK 3.29.0
+- Cuenta de Firebase
+- Un dispositivo físico o dos emuladores Android (recomendado al menos un dispositivo real)
+- Conexión a Internet
