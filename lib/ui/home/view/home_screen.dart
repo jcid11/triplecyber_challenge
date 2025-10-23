@@ -76,8 +76,8 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Create or Join a Room',
+              const BuildText(
+                text: 'Create or Join a Room',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
@@ -96,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 8),
               ElevatedButton.icon(
                 icon: const Icon(Icons.login),
-                label: const Text('Join'),
+                label: const BuildText(text: 'Join'),
                 onPressed: () {
                   final id = _joinCtrl.text.trim();
                   if (id.isNotEmpty) {

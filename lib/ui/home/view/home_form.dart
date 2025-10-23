@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:triplecyber_challenge/utils/dialogs/show_loading.dart';
 import 'package:triplecyber_challenge/utils/reusable_widgets/build_text.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../bloc/call_bloc/call_bloc.dart';
 import '../../call/call_page.dart';
@@ -28,7 +27,7 @@ class CreateCallButton extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         if (waiting != null) ...[
-          const Text('Room ID:'),
+          const BuildText(text: 'Room ID:'),
           const SizedBox(width: 8),
           SelectableText(
             waiting,
@@ -47,7 +46,7 @@ class RightAwayCallButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ElevatedButton.icon(
       icon: const Icon(Icons.video_call_outlined),
-      label: const Text('Create A Right Away Call'),
+      label: const BuildText(text: 'Create A Right Away Call'),
       onPressed:
           () => context.read<CallBloc>().add(
         RightAwayCallRequested(),

@@ -86,7 +86,7 @@ class _CallScreenState extends State<CallScreen> {
             Positioned(
               top: 48,
               left: 16,
-              child: Chip(label: Text('Room: ${widget.roomId}')),
+              child: Chip(label: BuildText(text: 'Room: ${widget.roomId}')),
             ),
             Positioned(
               top: 40,

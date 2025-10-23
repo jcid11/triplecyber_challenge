@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:triplecyber_challenge/utils/reusable_widgets/build_text.dart';
 
 void showLoadingDialog(BuildContext context, {String message = 'Loading...'}) {
   showDialog(
@@ -19,8 +20,8 @@ void showLoadingDialog(BuildContext context, {String message = 'Loading...'}) {
               child: CircularProgressIndicator(strokeWidth: 6),
             ),
             const SizedBox(height: 20),
-            Text(
-              message,
+            BuildText(
+              text: message,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 16,
