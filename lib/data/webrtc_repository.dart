@@ -73,48 +73,22 @@ class WebRtcRepository {
     }
   }
 
-  // Future<void> createPeer(
-  //   MediaStream localStream, {
-  //   Function(MediaStream)? onRemote,
-  // }) async {
-  //   pc = await createPeerConnection(_iceServers, _pcConstraints);
-  //
-  //   for (final track in localStream.getTracks()) {
-  //     await pc!.addTrack(track, localStream);
-  //   }
-  //
-  //   pc!.onTrack = (RTCTrackEvent e) {
-  //     if (e.streams.isNotEmpty) {
-  //       remote.srcObject = e.streams[0];
-  //       onRemote?.call(e.streams[0]);
-  //     }
-  //   };
-  // }
   Future<void> createPeer(
       MediaStream localStream, {
         void Function(MediaStream)? onRemote,
       }) async {
     pc = await createPeerConnection(_iceServers, _pcConstraints);
 
-    // Add local tracks
     for (final track in localStream.getTracks()) {
       await pc!.addTrack(track, localStream);
     }
 
-    // Legacy (still fires on Android sometimes) — good safety net
     pc!.onAddStream = (MediaStream s) {
-      // ignore: avoid_print
-      print('onAddStream: id=${s.id} a=${s.getAudioTracks().length} v=${s.getVideoTracks().length}');
       remote.srcObject = s;
       onRemote?.call(s);
     };
 
-    // Unified Plan — fires per-track; sometimes with empty streams for video
     pc!.onTrack = (RTCTrackEvent e) async {
-      // ignore: avoid_print
-      print('onTrack: kind=${e.track.kind} streams=${e.streams.length} readyState=${e.track}');
-
-      // Prefer the first provided stream if present
       if (e.streams.isNotEmpty) {
         final s = e.streams.first;
         remote.srcObject = s;
@@ -122,21 +96,15 @@ class WebRtcRepository {
         return;
       }
 
-      // If no streams provided (common for video), attach the track to a stream manually
-      // Reuse existing remote stream if any; otherwise create one.
       MediaStream target = remote.srcObject ?? await createLocalMediaStream('remote-ms');
       final alreadyHasVideo = target.getVideoTracks().isNotEmpty;
       final alreadyHasAudio = target.getAudioTracks().isNotEmpty;
 
       if (e.track.kind == 'video' && !alreadyHasVideo) {
-        // ignore: avoid_print
-        print('onTrack: attaching VIDEO track manually');
         await target.addTrack(e.track);
         remote.srcObject = target;
         onRemote?.call(target);
       } else if (e.track.kind == 'audio' && !alreadyHasAudio) {
-        // ignore: avoid_print
-        print('onTrack: attaching AUDIO track manually');
         await target.addTrack(e.track);
         remote.srcObject = target;
         onRemote?.call(target);

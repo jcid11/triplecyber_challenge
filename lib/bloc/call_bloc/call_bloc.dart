@@ -38,18 +38,11 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     on<ToggleCameraRequested>(_onToggleCamera);
     on<RemoteRoomDeleted>(_onRemoteRoomDeleted);
     on<RefreshUIRequested>(_onRefreshUIRequested);
-
   }
 
+  void _onRefreshUIRequested(RefreshUIRequested e, Emitter<CallState> emit) =>
+      emit(RefreshState());
 
-  void _onRefreshUIRequested(
-      RefreshUIRequested e,
-      Emitter<CallState> emit,
-      ) {
-    final current = state;
-    emit( RefreshState());   // <- pulse only for listeners
-    emit(current);                // <- restore previous state immediately
-  }
   Future<void> _onToggleMic(
     ToggleMicRequested e,
     Emitter<CallState> emit,
@@ -113,11 +106,11 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       _roomSub = signaling.watchRoom(_roomId!).listen((snap) async {
         final data = snap.data();
         final ans = data?['answer'];
-        if (ans != null  ) {
-            await webrtc.setRemote(
-              RTCSessionDescription(ans['sdp'], ans['type']),
-            );
-            add(const RefreshUIRequested());
+        if (ans != null) {
+          await webrtc.setRemote(
+            RTCSessionDescription(ans['sdp'], ans['type']),
+          );
+          add(const RefreshUIRequested());
         }
       });
 
@@ -160,63 +153,64 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   ) async {
     try {
       _roomId = const Uuid().v4().substring(0, 6).toUpperCase();
-      await webrtc.initRenderers();
-      _localStream = await webrtc.openUserMedia();
-      await webrtc.createPeer(_localStream!, onRemote: (_) {
-      });
+      // await webrtc.initRenderers();
+      // _localStream = await webrtc.openUserMedia();
+      // await webrtc.createPeer(_localStream!, onRemote: (_) {});
 
       // ICE out
-      webrtc.onIceCandidate((c) {
-        signaling.addCallerCandidate(_roomId!, {
-          'candidate': c.candidate,
-          'sdpMid': c.sdpMid,
-          'sdpMLineIndex': c.sdpMLineIndex,
-        });
-      });
+      // webrtc.onIceCandidate((c) {
+      //   signaling.addCallerCandidate(_roomId!, {
+      //     'candidate': c.candidate,
+      //     'sdpMid': c.sdpMid,
+      //     'sdpMLineIndex': c.sdpMLineIndex,
+      //   });
+      // });
 
-      final offer = await webrtc.createOffer();
-      await signaling.createRoom(_roomId!, {
-        'type': offer.type,
-        'sdp': offer.sdp,
-      });
+      // final offer = await webrtc.createOffer();
+      // await signaling.createRoom(_roomId!, {
+      //   'type': offer.type,
+      //   'sdp': offer.sdp,
+      // });
+      await signaling.createRoom(_roomId!, {'offer': null});
+      emit(WaitingPeer(_roomId!));
 
       // Watch for answer
-      _roomSub?.cancel();
-      _roomSub = signaling.watchRoom(_roomId!).listen((snap) async {
-        final data = snap.data();
-        final ans = data?['answer'];
-        if (ans != null &&
-            webrtc.pc?.signalingState !=
-                RTCSignalingState.RTCSignalingStateStable) {
-          await webrtc.setRemote(
-            RTCSessionDescription(ans['sdp'], ans['type']),
-          );
-          emit(
-            InCall(
-              roomId: _roomId!,
-              local: webrtc.local,
-              remote: webrtc.remote,
-            ),
-          );
-        }
-      });
-
-      // Watch callee ICE
-      _calleeIceSub?.cancel();
-      _calleeIceSub = signaling.watchCalleeCandidates(_roomId!).listen((qs) {
-        for (final ch in qs.docChanges) {
-          if (ch.type == DocumentChangeType.added) {
-            final c = ch.doc.data();
-            webrtc.addIce(
-              RTCIceCandidate(
-                c?['candidate'],
-                c?['sdpMid'],
-                c?['sdpMLineIndex'],
-              ),
-            );
-          }
-        }
-      });
+      // _roomSub?.cancel();
+      // _roomSub = signaling.watchRoom(_roomId!).listen((snap) async {
+      //   final data = snap.data();
+      //   final ans = data?['answer'];
+      //   if (ans != null &&
+      //       webrtc.pc?.signalingState !=
+      //           RTCSignalingState.RTCSignalingStateStable) {
+      //     await webrtc.setRemote(
+      //       RTCSessionDescription(ans['sdp'], ans['type']),
+      //     );
+      //     emit(
+      //       InCall(
+      //         roomId: _roomId!,
+      //         local: webrtc.local,
+      //         remote: webrtc.remote,
+      //       ),
+      //     );
+      //   }
+      // });
+      //
+      // // Watch callee ICE
+      // _calleeIceSub?.cancel();
+      // _calleeIceSub = signaling.watchCalleeCandidates(_roomId!).listen((qs) {
+      //   for (final ch in qs.docChanges) {
+      //     if (ch.type == DocumentChangeType.added) {
+      //       final c = ch.doc.data();
+      //       webrtc.addIce(
+      //         RTCIceCandidate(
+      //           c?['candidate'],
+      //           c?['sdpMid'],
+      //           c?['sdpMLineIndex'],
+      //         ),
+      //       );
+      //     }
+      //   }
+      // });
 
       emit(WaitingPeer(_roomId!));
     } catch (e) {
@@ -233,7 +227,9 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       _roomId = event.roomId.trim();
 
       final room = await signaling.getRoom(_roomId!);
-      if (room == null || room['offer'] == null) {
+      if (room == null
+          // || room['offer'] == null
+      ) {
         emit(const CallError('Room not found or missing offer'));
         return;
       }
@@ -280,16 +276,14 @@ class CallBloc extends Bloc<CallEvent, CallState> {
           }
         }
       });
-      // NEW: watch the room doc for deletion/ended
       _roomSub?.cancel();
       _roomSub = signaling.watchRoom(_roomId!).listen((snap) async {
         if (!snap.exists || (snap.data()?['ended'] == true)) {
-          add(const RemoteRoomDeleted()); // -> triggers local teardown
+          add(const RemoteRoomDeleted());
           return;
         }
       });
 
-      // Emit InCall and start quality polling
       emit(
         InCall(
           roomId: _roomId!,
@@ -323,7 +317,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       _roomId = null;
       _isRoomOwner = false;
       _localStream = null;
-
+      emit(CallDeletedByOwner());
       emit(CallEnded());
       emit(CallIdle());
     } catch (err) {
@@ -402,4 +396,3 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     return super.close();
   }
 }
-

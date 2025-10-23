@@ -92,3 +92,5 @@ class CallError extends CallState {
 class CallDeleted extends CallState {}
 
 class RefreshState extends CallState{}
+
+class CallDeletedByOwner extends CallState{}

@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 );
-              } else if (state is RemoteRoomDeleted) {
+              } else if (state is CallDeletedByOwner) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     behavior: SnackBarBehavior.floating,
