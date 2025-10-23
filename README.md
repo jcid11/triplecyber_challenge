@@ -65,3 +65,9 @@ Verifica que estos permisos estén definidos en android/app/src/main/AndroidMani
 - Se cierra la conexión (RTCPeerConnection)
 - Se eliminan las referencias en Firestore
 - Se limpian los recursos locales (renderers, streams, subscriptions)
+
+### Ver video demo https://drive.google.com/file/d/11MA2unQWH61lYHMX09qyOIjVfIWBfY4j/view?usp=sharing
+
+- Nota:
+  * El video solo muestra el flujo cuando uno mismo crea la llamada ya que es el comportamiento mas conocido a nivel de experiencia de usuario.
+  * El flujo de crear una sala esta funcionando correctamente pero tiene un comportamiento totalmente distinto donde practicamente se crea una sala(administrador) y cuando el visitante entra a       la sala practicamente redirecciona al administrador automaticamente a la llamada (practicamente como cree este flujo entre prueba y/o error para ver el correcto comportamiento del flujo y su     funcionalidad) y aunque es un comportamiento interesante no es el tipico que solemos ver, asi que estare haciendo unos ajustes para mejorar el funcionamiento del mismo.
