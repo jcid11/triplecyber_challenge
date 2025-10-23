@@ -36,6 +36,7 @@ rooms/
       ├── answer
       ├── callerCandidates/
       └── calleeCandidates/
+```
 
 Cada sala (roomId) representa una llamada activa entre dos usuarios.
 Dentro se guardan las ofertas (SDP), respuestas y candidatos de red (ICE) necesarios para establecer la conexión P2P.
