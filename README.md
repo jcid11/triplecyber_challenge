@@ -29,6 +29,7 @@ Este proyecto utiliza Firebase Firestore para el intercambio de señalización (
 
 ### Estructura esperada en firebase
 
+```text
 rooms/
  └── {roomId}/
       ├── offer
