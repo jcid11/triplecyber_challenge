@@ -8,6 +8,8 @@ class WebRtcRepository {
   late RTCVideoRenderer local ;
   late RTCVideoRenderer remote ;
   bool _renderersReady = false;
+  bool _usingFrontCamera = true;
+  bool get isFrontCamera => _usingFrontCamera;
 
 
   static const _iceServers = {
@@ -32,10 +34,10 @@ class WebRtcRepository {
     await local.initialize();
     await remote.initialize();
     _renderersReady = true;
+    _usingFrontCamera = true;
   }
 
   Future<void> resetRenderers() async {
-    // dispose old ones if they exist
     if (_renderersReady) {
       try { await local.dispose(); } catch (_) {}
       try { await remote.dispose(); } catch (_) {}
@@ -54,8 +56,22 @@ class WebRtcRepository {
     return stream;
   }
 
+  Future<bool> toggleCamera() async {
+    final tracks = local.srcObject?.getVideoTracks();
+    if (tracks == null || tracks.isEmpty) return _usingFrontCamera;
 
-  Future<void> createPeer(MediaStream localStream, {Function(MediaStream)? onRemote}) async {
+    try{
+      await Helper.switchCamera(tracks.first);
+      _usingFrontCamera=!_usingFrontCamera;
+      return _usingFrontCamera;
+    }catch(e){
+      throw('Error has occurred toggling camera :$e');
+    }
+  }
+
+
+
+    Future<void> createPeer(MediaStream localStream, {Function(MediaStream)? onRemote}) async {
     pc = await createPeerConnection(_iceServers, _pcConstraints);
 
 

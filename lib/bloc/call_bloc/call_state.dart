@@ -11,9 +11,9 @@ abstract class CallState extends Equatable {
 
 class CallIdle extends CallState {}
 
-class LoadingCallLive extends CallState{}
+class LoadingCallLive extends CallState {}
 
-class LoadingDoneCallLive extends CallState{}
+class LoadingDoneCallLive extends CallState {}
 
 class CreatingCall extends CallState {
   final String roomId;
@@ -39,6 +39,7 @@ class InCall extends CallState {
   final RTCVideoRenderer remote;
   final bool micEnabled;
   final ConnectionQuality quality;
+  final bool frontCamera;
 
   const InCall({
     required this.roomId,
@@ -46,21 +47,35 @@ class InCall extends CallState {
     required this.remote,
     this.micEnabled = true,
     this.quality = ConnectionQuality.good,
+    this.frontCamera = true,
   });
 
-  InCall copyWith({bool? micEnabled, ConnectionQuality? quality}) => InCall(
+  InCall copyWith({
+    bool? micEnabled,
+    ConnectionQuality? quality,
+    bool? frontCamera,
+  }) => InCall(
     roomId: roomId,
     local: local,
     remote: remote,
     micEnabled: micEnabled ?? this.micEnabled,
     quality: quality ?? this.quality,
+    frontCamera: frontCamera ?? this.frontCamera,
   );
 
   @override
-  List<Object?> get props => [roomId, local, remote, micEnabled, quality];
+  List<Object?> get props => [
+    roomId,
+    local,
+    remote,
+    micEnabled,
+    quality,
+    frontCamera,
+  ];
 
   @override
-  String toString() => 'CallState quantity: $quality';
+  String toString() =>
+      'CallState quantity: $quality, micEnable: $micEnabled, frontCamera:$frontCamera';
 }
 
 class CallEnded extends CallState {}
@@ -74,4 +89,4 @@ class CallError extends CallState {
   List<Object?> get props => [message];
 }
 
-class CallDeleted extends CallState{}
+class CallDeleted extends CallState {}

@@ -35,6 +35,8 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     on<QualityTicked>(_onQualityTicked);
     on<RightAwayCallRequested>(_rightAwayCallCreated);
     on<ToggleMicRequested>(_onToggleMic);
+    on<ToggleCameraRequested>(_onToggleCamera);
+
   }
 
   Future<void> _onToggleMic(
@@ -53,6 +55,17 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     final s = state;
     if (s is InCall) {
       emit(s.copyWith(micEnabled: newEnabled));
+    }
+  }
+
+  Future<void> _onToggleCamera(
+      ToggleCameraRequested event,
+      Emitter<CallState> emit,
+      ) async {
+    final isFront = await webrtc.toggleCamera();
+    final s = state;
+    if (s is InCall) {
+      emit(s.copyWith(frontCamera: isFront));
     }
   }
 
@@ -125,6 +138,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
           remote: webrtc.remote,
           micEnabled: _initialMicEnabled,
           quality: ConnectionQuality.good,
+          frontCamera: webrtc.isFrontCamera,
         ),
       );
       _startQualityPolling();
@@ -267,6 +281,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
           remote: webrtc.remote,
           micEnabled: _initialMicEnabled,
           quality: ConnectionQuality.good,
+          frontCamera: webrtc.isFrontCamera,
         ),
       );
       _startQualityPolling();

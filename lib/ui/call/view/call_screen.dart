@@ -52,18 +52,29 @@ class CallScreen extends StatelessWidget {
                 ),
               ),
             ),
-            // BlocBuilder<CallBloc,CallState>(builder: (BuildContext context, CallState state) {
-            //   return Positioned(
-            //     top: 102,
-            //     left: 16,
-            //     child: Column(
-            //       children: [
-            //         if(state is InCall)
-            //           Chip(label: BuildText(text: 'connection Quality :${state.quality}'))
-            //       ],
-            //     ),
-            //   );
-            // },),
+            Positioned(
+              bottom: 42,
+              left: 32,
+              child: BlocSelector<CallBloc, CallState, bool>(
+                selector: (s) => s is InCall ? s.frontCamera : true,
+                builder: (context, isFront) {
+                  return FloatingActionButton(
+                    heroTag: 'flip_camera_fab',
+                    // unique tag
+                    onPressed:
+                        () => context.read<CallBloc>().add(
+                          ToggleCameraRequested(),
+                        ),
+                    tooltip: 'Switch camera',
+                    child: Icon(
+                      isFront
+                          ? Icons.cameraswitch
+                          : Icons.cameraswitch_outlined,
+                    ),
+                  );
+                },
+              ),
+            ),
             Positioned(
               top: 48,
               left: 16,

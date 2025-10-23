@@ -29,3 +29,5 @@ class QualityTicked extends CallEvent {
 
 
 class HangUpRequested extends CallEvent {}
+
+class ToggleCameraRequested extends CallEvent {}
