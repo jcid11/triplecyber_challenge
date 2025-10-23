@@ -40,3 +40,28 @@ rooms/
 
 Cada sala (roomId) representa una llamada activa entre dos usuarios.
 Dentro se guardan las ofertas (SDP), respuestas y candidatos de red (ICE) necesarios para establecer la conexión P2P.
+
+## 🔸 4. Permisos requeridos (Android)
+
+Verifica que estos permisos estén definidos en android/app/src/main/AndroidManifest.xml:
+
+```text
+<uses-feature android:name="android.hardware.camera" />
+<uses-feature android:name="android.hardware.camera.autofocus" />
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
+<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+```
+## 5. Flujo de la aplicación
+
+- Usuario A (Caller) crea la sala → se genera un offer (SDP) en Firestore.
+- Usuario B (Callee) ingresa el ID de la sala → obtiene el offer y genera un answer.
+- Ambos intercambian ICE candidates en Firestore para encontrar la mejor ruta de conexión.
+- Una vez que ambos tienen offer, answer y candidates, se establece una conexión WebRTC P2P directa.
+- Audio y video fluyen entre dispositivos sin pasar por Firebase.
+- Cuando uno de los usuarios finaliza la llamada:
+- Se cierra la conexión (RTCPeerConnection)
+- Se eliminan las referencias en Firestore
+- Se limpian los recursos locales (renderers, streams, subscriptions)
