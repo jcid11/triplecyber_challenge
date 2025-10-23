@@ -9,3 +9,5 @@ Implementar un flujo completo de videollamada entre dos usuarios, demostrando do
 - 🎥 Comunicación en tiempo real con **WebRTC**
 - ☁️ Integración con **Firebase Firestore** para señalización
 - 🧹 Manejo correcto de recursos, permisos y teardown de conexión
+
+## ⚙️ Instrucciones de configuración e instalación
