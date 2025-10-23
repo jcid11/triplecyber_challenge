@@ -73,3 +73,5 @@ class CallError extends CallState {
   @override
   List<Object?> get props => [message];
 }
+
+class CallDeleted extends CallState{}

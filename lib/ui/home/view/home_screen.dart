@@ -25,11 +25,12 @@ class _HomeScreenState extends State<HomeScreen> {
               final s = state as InCall;
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => CallPage(
-                    roomId: s.roomId,
-                    local: s.local,
-                    remote: s.remote,
-                  ),
+                  builder:
+                      (_) => CallPage(
+                        roomId: s.roomId,
+                        local: s.local,
+                        remote: s.remote,
+                      ),
                 ),
               );
             },
@@ -42,8 +43,20 @@ class _HomeScreenState extends State<HomeScreen> {
               } else if (state is LoadingDoneCallLive) {
                 Navigator.pop(context);
               } else if (state is CallError) {
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(state.message)));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                      behavior: SnackBarBehavior.floating,
+                      content: BuildText(text: state.message)),
+                );
+              } else if (state is CallDeleted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    behavior: SnackBarBehavior.floating,
+                    content: BuildText(
+                      text: 'Room has been deleted successfully',
+                    ),
+                  ),
+                );
               }
             },
           ),

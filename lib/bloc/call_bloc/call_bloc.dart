@@ -276,21 +276,32 @@ class CallBloc extends Bloc<CallEvent, CallState> {
   }
 
   Future<void> _onHangUp(HangUpRequested event, Emitter<CallState> emit) async {
-    try {
-      _roomSub?.cancel();
-      _callerIceSub?.cancel();
-      _calleeIceSub?.cancel();
-      await webrtc.hangUp();
-      if (_isRoomOwner && _roomId != null) {
-        await signaling.deleteRoomDeep(_roomId!);
-      }
-      _roomId = null;
-      _isRoomOwner = false;
-      _localStream = null;
-      emit(CallEnded());
-      emit(CallIdle());
-    } catch (e) {
-      emit(CallError('Hangup failed: $e'));
+    _stopQualityPolling();
+
+    _roomSub?.cancel();
+    _callerIceSub?.cancel();
+    _calleeIceSub?.cancel();
+    _roomSub = _callerIceSub = _calleeIceSub = null;
+
+    await webrtc.hangUp();
+    // 3) capture room ownership BEFORE clearing local fields
+    final roomId = _roomId;
+    final isOwner = _isRoomOwner;
+
+    // 4) clear local session state (so UI can leave right away)
+    _roomId = null;
+    _isRoomOwner = false;
+    _localStream = null;
+
+    emit(CallEnded());
+    emit(CallIdle());
+    if (isOwner && roomId != null) {
+        try {
+          await signaling.deleteRoomDeep(roomId);
+          emit(CallDeleted());
+        } catch (e) {
+          debugPrint('Room delete failed: $e');
+        }
     }
   }
 
