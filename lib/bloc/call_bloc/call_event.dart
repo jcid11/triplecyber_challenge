@@ -31,3 +31,11 @@ class QualityTicked extends CallEvent {
 class HangUpRequested extends CallEvent {}
 
 class ToggleCameraRequested extends CallEvent {}
+
+class RemoteRoomDeleted extends CallEvent {
+  const RemoteRoomDeleted();
+}
+
+class RefreshUIRequested extends CallEvent {
+  const RefreshUIRequested();
+}

@@ -2,22 +2,24 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import '../bloc/call_bloc/call_bloc.dart';
 
-
 class WebRtcRepository {
   RTCPeerConnection? pc;
-  late RTCVideoRenderer local ;
-  late RTCVideoRenderer remote ;
+  late RTCVideoRenderer local;
+
+  late RTCVideoRenderer remote;
+
   bool _renderersReady = false;
   bool _usingFrontCamera = true;
-  bool get isFrontCamera => _usingFrontCamera;
 
+  bool get isFrontCamera => _usingFrontCamera;
 
   static const _iceServers = {
     'iceServers': [
-      {'urls': ['stun:stun.l.google.com:19302']},
+      {
+        'urls': ['stun:stun.l.google.com:19302'],
+      },
     ],
   };
-
 
   final _pcConstraints = {
     'mandatory': {},
@@ -25,7 +27,6 @@ class WebRtcRepository {
       {'DtlsSrtpKeyAgreement': true},
     ],
   };
-
 
   Future<void> initRenderers() async {
     if (_renderersReady) return;
@@ -39,18 +40,21 @@ class WebRtcRepository {
 
   Future<void> resetRenderers() async {
     if (_renderersReady) {
-      try { await local.dispose(); } catch (_) {}
-      try { await remote.dispose(); } catch (_) {}
+      try {
+        await local.dispose();
+      } catch (_) {}
+      try {
+        await remote.dispose();
+      } catch (_) {}
       _renderersReady = false;
     }
     await initRenderers();
   }
 
-
   Future<MediaStream> openUserMedia() async {
     final stream = await navigator.mediaDevices.getUserMedia({
       'audio': true,
-      'video': {'facingMode': 'user'}
+      'video': {'facingMode': 'user'},
     });
     local.srcObject = stream;
     return stream;
@@ -60,48 +64,105 @@ class WebRtcRepository {
     final tracks = local.srcObject?.getVideoTracks();
     if (tracks == null || tracks.isEmpty) return _usingFrontCamera;
 
-    try{
+    try {
       await Helper.switchCamera(tracks.first);
-      _usingFrontCamera=!_usingFrontCamera;
+      _usingFrontCamera = !_usingFrontCamera;
       return _usingFrontCamera;
-    }catch(e){
-      throw('Error has occurred toggling camera :$e');
+    } catch (e) {
+      throw ('Error has occurred toggling camera :$e');
     }
   }
 
-
-
-    Future<void> createPeer(MediaStream localStream, {Function(MediaStream)? onRemote}) async {
+  // Future<void> createPeer(
+  //   MediaStream localStream, {
+  //   Function(MediaStream)? onRemote,
+  // }) async {
+  //   pc = await createPeerConnection(_iceServers, _pcConstraints);
+  //
+  //   for (final track in localStream.getTracks()) {
+  //     await pc!.addTrack(track, localStream);
+  //   }
+  //
+  //   pc!.onTrack = (RTCTrackEvent e) {
+  //     if (e.streams.isNotEmpty) {
+  //       remote.srcObject = e.streams[0];
+  //       onRemote?.call(e.streams[0]);
+  //     }
+  //   };
+  // }
+  Future<void> createPeer(
+      MediaStream localStream, {
+        void Function(MediaStream)? onRemote,
+      }) async {
     pc = await createPeerConnection(_iceServers, _pcConstraints);
 
-
+    // Add local tracks
     for (final track in localStream.getTracks()) {
       await pc!.addTrack(track, localStream);
     }
 
+    // Legacy (still fires on Android sometimes) — good safety net
+    pc!.onAddStream = (MediaStream s) {
+      // ignore: avoid_print
+      print('onAddStream: id=${s.id} a=${s.getAudioTracks().length} v=${s.getVideoTracks().length}');
+      remote.srcObject = s;
+      onRemote?.call(s);
+    };
 
-    pc!.onTrack = (RTCTrackEvent e) {
+    // Unified Plan — fires per-track; sometimes with empty streams for video
+    pc!.onTrack = (RTCTrackEvent e) async {
+      // ignore: avoid_print
+      print('onTrack: kind=${e.track.kind} streams=${e.streams.length} readyState=${e.track}');
+
+      // Prefer the first provided stream if present
       if (e.streams.isNotEmpty) {
-        remote.srcObject = e.streams[0];
-        onRemote?.call(e.streams[0]);
+        final s = e.streams.first;
+        remote.srcObject = s;
+        onRemote?.call(s);
+        return;
+      }
+
+      // If no streams provided (common for video), attach the track to a stream manually
+      // Reuse existing remote stream if any; otherwise create one.
+      MediaStream target = remote.srcObject ?? await createLocalMediaStream('remote-ms');
+      final alreadyHasVideo = target.getVideoTracks().isNotEmpty;
+      final alreadyHasAudio = target.getAudioTracks().isNotEmpty;
+
+      if (e.track.kind == 'video' && !alreadyHasVideo) {
+        // ignore: avoid_print
+        print('onTrack: attaching VIDEO track manually');
+        await target.addTrack(e.track);
+        remote.srcObject = target;
+        onRemote?.call(target);
+      } else if (e.track.kind == 'audio' && !alreadyHasAudio) {
+        // ignore: avoid_print
+        print('onTrack: attaching AUDIO track manually');
+        await target.addTrack(e.track);
+        remote.srcObject = target;
+        onRemote?.call(target);
       }
     };
   }
 
 
+
   Future<RTCSessionDescription> createOffer() async {
-    final offer = await pc!.createOffer({'offerToReceiveAudio': 1, 'offerToReceiveVideo': 1});
+    final offer = await pc!.createOffer({
+      'offerToReceiveAudio': 1,
+      'offerToReceiveVideo': 1,
+    });
     await pc!.setLocalDescription(offer);
     return offer;
   }
 
-
   Future<RTCSessionDescription> createAnswer() async {
-    final answer = await pc!.createAnswer({'offerToReceiveAudio': 1, 'offerToReceiveVideo': 1});
+    final answer = await pc!.createAnswer({
+      'offerToReceiveAudio': 1,
+      'offerToReceiveVideo': 1,
+    });
     await pc!.setLocalDescription(answer);
     return answer;
   }
-
 
   Future<void> setRemote(RTCSessionDescription sdp) async {
     await pc!.setRemoteDescription(sdp);
@@ -111,9 +172,7 @@ class WebRtcRepository {
     pc!.onIceCandidate = handler;
   }
 
-
   Future<void> addIce(RTCIceCandidate c) async => pc!.addCandidate(c);
-
 
   Future<void> hangUp() async {
     try {
@@ -183,6 +242,4 @@ class WebRtcRepository {
     if (rttMs > 150 || jitterMs > 20) return ConnectionQuality.fair;
     return ConnectionQuality.excellent;
   }
-
-
 }

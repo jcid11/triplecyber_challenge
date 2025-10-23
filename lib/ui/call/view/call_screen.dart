@@ -1,6 +1,6 @@
 part of 'call_form.dart';
 
-class CallScreen extends StatelessWidget {
+class CallScreen extends StatefulWidget {
   final String roomId;
   final RTCVideoRenderer local;
   final RTCVideoRenderer remote;
@@ -13,11 +13,20 @@ class CallScreen extends StatelessWidget {
   });
 
   @override
+  State<CallScreen> createState() => _CallScreenState();
+}
+
+class _CallScreenState extends State<CallScreen> {
+  @override
   Widget build(BuildContext context) {
     return BlocListener<CallBloc, CallState>(
       listener: (BuildContext context, CallState state) {
         if (state is CallEnded) {
           Navigator.pop(context);
+        }
+        if(state is RefreshState){
+          setState(() {
+          });
         }
       },
       child: Scaffold(
@@ -29,7 +38,7 @@ class CallScreen extends StatelessWidget {
               child: Container(
                 color: Colors.black,
                 child: RTCVideoView(
-                  remote,
+                  widget.remote,
                   objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
                 ),
               ),
@@ -45,7 +54,7 @@ class CallScreen extends StatelessWidget {
                 child: DecoratedBox(
                   decoration: BoxDecoration(color: Colors.black),
                   child: RTCVideoView(
-                    local,
+                    widget.local,
                     mirror: true,
                     filterQuality: FilterQuality.medium,
                   ),
@@ -53,14 +62,13 @@ class CallScreen extends StatelessWidget {
               ),
             ),
             Positioned(
-              bottom: 42,
+              bottom: 16,
               left: 32,
               child: BlocSelector<CallBloc, CallState, bool>(
                 selector: (s) => s is InCall ? s.frontCamera : true,
                 builder: (context, isFront) {
                   return FloatingActionButton(
                     heroTag: 'flip_camera_fab',
-                    // unique tag
                     onPressed:
                         () => context.read<CallBloc>().add(
                           ToggleCameraRequested(),
@@ -78,7 +86,7 @@ class CallScreen extends StatelessWidget {
             Positioned(
               top: 48,
               left: 16,
-              child: Chip(label: Text('Room: $roomId')),
+              child: Chip(label: Text('Room: ${widget.roomId}')),
             ),
             Positioned(
               top: 40,

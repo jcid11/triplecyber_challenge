@@ -45,8 +45,9 @@ class _HomeScreenState extends State<HomeScreen> {
               } else if (state is CallError) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                      behavior: SnackBarBehavior.floating,
-                      content: BuildText(text: state.message)),
+                    behavior: SnackBarBehavior.floating,
+                    content: BuildText(text: state.message),
+                  ),
                 );
               } else if (state is CallDeleted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -54,6 +55,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     behavior: SnackBarBehavior.floating,
                     content: BuildText(
                       text: 'Room has been deleted successfully',
+                    ),
+                  ),
+                );
+              } else if (state is RemoteRoomDeleted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    behavior: SnackBarBehavior.floating,
+                    content: BuildText(
+                      text: 'The Session Has Been Closed By The Owner.',
                     ),
                   ),
                 );
