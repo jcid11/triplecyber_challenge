@@ -11,6 +11,10 @@ abstract class CallState extends Equatable {
 
 class CallIdle extends CallState {}
 
+class LoadingCallLive extends CallState{}
+
+class LoadingDoneCallLive extends CallState{}
+
 class CreatingCall extends CallState {
   final String roomId;
 

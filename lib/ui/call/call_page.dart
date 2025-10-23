@@ -15,5 +15,6 @@ class CallPage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) => CallScreen(roomId: roomId, local: local, remote: remote,);
+  Widget build(BuildContext context) =>
+      CallScreen(roomId: roomId, local: local, remote: remote);
 }

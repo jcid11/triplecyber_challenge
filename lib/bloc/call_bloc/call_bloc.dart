@@ -10,6 +10,7 @@ import '../../data/signaling_repository.dart';
 import '../../data/webrtc_repository.dart';
 
 part 'call_event.dart';
+
 part 'call_state.dart';
 
 class CallBloc extends Bloc<CallEvent, CallState> {
@@ -59,6 +60,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     RightAwayCallRequested event,
     Emitter<CallState> emit,
   ) async {
+    emit(LoadingCallLive());
     try {
       _isRoomOwner = true;
       _roomId = const Uuid().v4().substring(0, 6).toUpperCase();
@@ -115,7 +117,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
           }
         }
       });
-
+      emit(LoadingDoneCallLive());
       emit(
         InCall(
           roomId: _roomId!,
@@ -292,14 +294,15 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     }
   }
 
-
-  Future<void> _onQualityTicked(QualityTicked e, Emitter<CallState> emit) async {
+  Future<void> _onQualityTicked(
+    QualityTicked e,
+    Emitter<CallState> emit,
+  ) async {
     final s = state;
     if (s is InCall && s.quality != e.quality) {
       emit(s.copyWith(quality: e.quality));
     }
   }
-
 
   bool get _initialMicEnabled {
     final tracks = _localStream?.getAudioTracks();
@@ -332,4 +335,3 @@ class CallBloc extends Bloc<CallEvent, CallState> {
     return super.close();
   }
 }
-

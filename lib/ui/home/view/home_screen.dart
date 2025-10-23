@@ -17,27 +17,37 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const BuildText(text: 'TriplerCyber Challenge'),
         centerTitle: true,
       ),
-      body: BlocListener<CallBloc, CallState>(
-        listenWhen: (prev, curr) => prev is! InCall && curr is InCall,
-        listener: (context, state) {
-          if (state is InCall) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder:
-                    (_) => CallPage(
-                      roomId: state.roomId,
-                      local: state.local,
-                      remote: state.remote,
-                    ),
-              ),
-            );
-          }
-          if (state is CallError) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
-          }
-        },
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<CallBloc, CallState>(
+            listenWhen: (prev, curr) => prev is! InCall && curr is InCall,
+            listener: (context, state) {
+              final s = state as InCall;
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => CallPage(
+                    roomId: s.roomId,
+                    local: s.local,
+                    remote: s.remote,
+                  ),
+                ),
+              );
+            },
+          ),
+          // 2) Always handle loading / done / error
+          BlocListener<CallBloc, CallState>(
+            listener: (context, state) {
+              if (state is LoadingCallLive) {
+                showLoadingDialog(context);
+              } else if (state is LoadingDoneCallLive) {
+                Navigator.pop(context);
+              } else if (state is CallError) {
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(state.message)));
+              }
+            },
+          ),
+        ],
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
