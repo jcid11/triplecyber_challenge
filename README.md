@@ -10,7 +10,7 @@ Implementar un flujo completo de videollamada entre dos usuarios, demostrando do
 - ☁️ Integración con **Firebase Firestore** para señalización
 - 🧹 Manejo correcto de recursos, permisos y teardown de conexión
 
-## ⚙️ Instrucciones de configuración e instalación
+## ⚙️ 1. Instrucciones de configuración e instalación
 
 Asegúrate de tener instalado en tu equipo:
 
@@ -18,3 +18,13 @@ Asegúrate de tener instalado en tu equipo:
 - Cuenta de Firebase
 - Un dispositivo físico o dos emuladores Android (recomendado al menos un dispositivo real)
 - Conexión a Internet
+
+## 🔸 2. Clonar el repositorio
+
+git clone https://github.com/jcid11/triplecyber_challenge.git
+
+## 3. Configuración de Firebase
+
+Este proyecto utiliza Firebase Firestore para el intercambio de señalización (ofertas, respuestas e ICE candidates).
+
+### Estructura esperada en firebase
