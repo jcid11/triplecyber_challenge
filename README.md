@@ -28,3 +28,13 @@ git clone https://github.com/jcid11/triplecyber_challenge.git
 Este proyecto utiliza Firebase Firestore para el intercambio de señalización (ofertas, respuestas e ICE candidates).
 
 ### Estructura esperada en firebase
+
+rooms/
+ └── {roomId}/
+      ├── offer
+      ├── answer
+      ├── callerCandidates/
+      └── calleeCandidates/
+
+Cada sala (roomId) representa una llamada activa entre dos usuarios.
+Dentro se guardan las ofertas (SDP), respuestas y candidatos de red (ICE) necesarios para establecer la conexión P2P.
