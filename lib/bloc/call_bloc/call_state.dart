@@ -3,10 +3,11 @@ part of 'call_bloc.dart';
 enum ConnectionQuality { excellent, good, fair, poor, bad }
 
 abstract class CallState extends Equatable {
-  const CallState();
+  final bool micEnabled;
+  const CallState({this.micEnabled = true});
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [micEnabled];
 }
 
 class CallIdle extends CallState {}
@@ -37,7 +38,6 @@ class InCall extends CallState {
   final String roomId;
   final RTCVideoRenderer local;
   final RTCVideoRenderer remote;
-  final bool micEnabled;
   final ConnectionQuality quality;
   final bool frontCamera;
 
@@ -45,23 +45,25 @@ class InCall extends CallState {
     required this.roomId,
     required this.local,
     required this.remote,
-    this.micEnabled = true,
+    required super.micEnabled,
     this.quality = ConnectionQuality.good,
     this.frontCamera = true,
-  });
+  }) ; // ✅ pass to parent
 
   InCall copyWith({
     bool? micEnabled,
     ConnectionQuality? quality,
     bool? frontCamera,
-  }) => InCall(
-    roomId: roomId,
-    local: local,
-    remote: remote,
-    micEnabled: micEnabled ?? this.micEnabled,
-    quality: quality ?? this.quality,
-    frontCamera: frontCamera ?? this.frontCamera,
-  );
+  }) {
+    return InCall(
+      roomId: roomId,
+      local: local,
+      remote: remote,
+      micEnabled: micEnabled ?? this.micEnabled,
+      quality: quality ?? this.quality,
+      frontCamera: frontCamera ?? this.frontCamera,
+    );
+  }
 
   @override
   List<Object?> get props => [
@@ -75,8 +77,9 @@ class InCall extends CallState {
 
   @override
   String toString() =>
-      'CallState quantity: $quality, micEnable: $micEnabled, frontCamera:$frontCamera';
+      'InCall(quality: $quality, frontCamera: $frontCamera, micEnabled: $micEnabled)';
 }
+
 
 class CallEnded extends CallState {}
 
@@ -91,6 +94,8 @@ class CallError extends CallState {
 
 class CallDeleted extends CallState {}
 
-class RefreshState extends CallState{}
+class RefreshState extends CallState {
+  const RefreshState({required super.micEnabled});
+}
 
 class CallDeletedByOwner extends CallState{}

@@ -63,7 +63,7 @@ class MicButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return  BlocSelector<CallBloc, CallState, bool>(
-      selector: (s) => s is InCall ? s.micEnabled : true,
+      selector: (s) =>s.micEnabled,
       builder:
           (context, micOn) => FloatingActionButton(
         heroTag: 'center_button',

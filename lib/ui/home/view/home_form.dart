@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:triplecyber_challenge/utils/dialogs/show_loading.dart';
 import 'package:triplecyber_challenge/utils/reusable_widgets/build_text.dart';
@@ -33,6 +34,10 @@ class CreateCallButton extends StatelessWidget {
             waiting,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
+          const SizedBox(width: 8,),
+          IconButton(onPressed: ()async{
+            await Clipboard.setData(ClipboardData(text: waiting));
+          }, icon: Icon(Icons.copy))
         ],
       ],
     );
