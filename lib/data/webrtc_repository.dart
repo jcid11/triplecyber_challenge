@@ -74,9 +74,9 @@ class WebRtcRepository {
   }
 
   Future<void> createPeer(
-      MediaStream localStream, {
-        void Function(MediaStream)? onRemote,
-      }) async {
+    MediaStream localStream, {
+    void Function(MediaStream)? onRemote,
+  }) async {
     pc = await createPeerConnection(_iceServers, _pcConstraints);
 
     for (final track in localStream.getTracks()) {
@@ -96,7 +96,8 @@ class WebRtcRepository {
         return;
       }
 
-      MediaStream target = remote.srcObject ?? await createLocalMediaStream('remote-ms');
+      MediaStream target =
+          remote.srcObject ?? await createLocalMediaStream('remote-ms');
       final alreadyHasVideo = target.getVideoTracks().isNotEmpty;
       final alreadyHasAudio = target.getAudioTracks().isNotEmpty;
 
@@ -111,8 +112,6 @@ class WebRtcRepository {
       }
     };
   }
-
-
 
   Future<RTCSessionDescription> createOffer() async {
     final offer = await pc!.createOffer({
@@ -132,13 +131,11 @@ class WebRtcRepository {
     return answer;
   }
 
-  Future<void> setRemote(RTCSessionDescription sdp) async {
-    await pc!.setRemoteDescription(sdp);
-  }
+  Future<void> setRemote(RTCSessionDescription sdp) async =>
+      await pc!.setRemoteDescription(sdp);
 
-  void onIceCandidate(void Function(RTCIceCandidate) handler) {
-    pc!.onIceCandidate = handler;
-  }
+  void onIceCandidate(void Function(RTCIceCandidate) handler) =>
+      pc!.onIceCandidate = handler;
 
   Future<void> addIce(RTCIceCandidate c) async => pc!.addCandidate(c);
 

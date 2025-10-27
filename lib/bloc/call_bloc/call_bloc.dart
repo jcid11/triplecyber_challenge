@@ -261,7 +261,6 @@ class CallBloc extends Bloc<CallEvent, CallState> {
 
       final room = event.room;
 
-
       final offer = room?['offer'];
       await webrtc.setRemote(
         RTCSessionDescription(offer['sdp'], offer['type']),
@@ -299,7 +298,7 @@ class CallBloc extends Bloc<CallEvent, CallState> {
       _roomSub?.cancel();
       _roomSub = signaling.watchRoom(_roomId!).listen((snap) async {
         final data = snap.data();
-        if (!snap.exists || (snap.data()?['ended'] == true)) {
+        if (!snap.exists || (snap.data()?['status'] == 'disconnected')) {
           add(const RemoteRoomDeleted());
           return;
         }
